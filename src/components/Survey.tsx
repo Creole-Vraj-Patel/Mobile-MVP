@@ -1,66 +1,97 @@
 import React, { useEffect, useState } from "react";
 import SurveyHeader from "./SurveyHeader";
-import { ProgressBar, Spinner } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import SurveyData from "./SurveyData";
 import SurveySidebar from "./Sidebar/SurveySidebar";
 import AlertModal from "./Modal/AlertModal";
 import InfoModal from "./Modal/InfoModal";
 import Successful from "../components/Successful";
-import { useParams } from "react-router";
-import { nanoid } from "nanoid";
+import { useLocation } from "react-router";
 import { MarketOptiontype, MarketType } from "../types";
 import { Howl, Howler } from "howler";
 import axios from "axios";
 import AlertSound from "../assets/sounds/Alert.mp3";
+import useStickyState from "../hooks/useStickyState";
 
 const Survey = () => {
-  const localSurveyData = localStorage.getItem("survey_data");
-  const localCartData = localStorage.getItem("cart_data");
-  const localThankYouPage = localStorage.getItem("thank_you_page");
-  const localDefaultData = localStorage.getItem("default_data");
-  const localTimer = localStorage.getItem("timer");
+  const params = new URLSearchParams(useLocation().search);
+  const RID = params.get("RID");
 
+  const [localSurveyData, setLocalSurveyData] = useStickyState(
+    [],
+    `survey_data${RID}`
+  );
+  const [localCartData] = useStickyState([], `cart_data${RID}`);
+  const [localThankYouPage, setLocalThankYouPage] = useStickyState(
+    false,
+    `thank_you_page${RID}`
+  );
+  const [localDefaultData] = useStickyState([], `default_data${RID}`);
+  const [, setLocalTimer] = useStickyState(0, `timer${RID}`);
+  const [localTimerCount, setLocalTimerCount] = useStickyState(
+    0,
+    `timer_count${RID}`
+  );
   const [fetchedData, setFetchedData] = useState<any>([]);
-  const [defaultData, setDefaultData] = useState<MarketType[] | []>(
-    localDefaultData !== null && localDefaultData !== undefined ? JSON.parse(localDefaultData) : []
+  const [, setDefaultData] = useState<MarketType[] | []>(
+    localDefaultData
   );
   const [surveyData, setSurveyData] = useState<MarketType[] | []>(
-    localSurveyData !== null ? JSON.parse(localSurveyData) : []
+    localSurveyData
   );
-  const [cartData, setCartData] = useState<MarketType[] | []>(localCartData !== null ? JSON.parse(localCartData) : []);
+  const [cartData, setCartData] = useState<MarketType[] | []>(localCartData);
   const [timer, setTimer] = useState<number>(0);
-  const [showThankyouPage, setShowThankyouPage] = useState<boolean>(
-    localThankYouPage !== null ? JSON.parse(localThankYouPage) : false
-  );
+  const [showThankyouPage, setShowThankyouPage] =
+    useState<boolean>(localThankYouPage);
   const [toggleSidebar, setToggleSidebar] = useState<boolean>(false);
   const [showWarning, setShowWarning] = useState<boolean>(false);
   const [showInfoPopup, setShowInfoPopup] = useState<boolean>(false);
   const [showTimerAlert, setShowTimerAlert] = useState<boolean>(false);
   const [infoID, setInfoID] = useState<number>(0);
-  const { userId } = useParams<{ userId: string }>();  
+  const [, setStartTime] = useState<any>();
+  const [, setEndTime] = useState<any>();
+
+  localStorage.setItem(`userId${RID}`, RID!);
 
   useEffect(() => {
     showTimerPopUp();
 
-    let formData = new FormData();
-    formData.append("rid", userId);
-    fetch("https://market-flask-app.herokuapp.com/api/start_survey", {
-      method: "post",
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setFetchedData(data);
+    if (localSurveyData.length === 0) {
+      let formData = new FormData();
+      formData.append("rid", RID!);
+      fetch(process.env.REACT_APP_START_SURVEY_API!, {
+        method: "post",
+        body: formData,
       })
-      .catch((err) => console.log(err));
+        .then((res) => res.json())
+        .then((data) => {
+          localStorage.setItem(
+            `endtime${RID}`,
+            JSON.stringify(
+              new Date(data.body[0].time_started).setTime(
+                new Date(data.body[0].time_started).getTime() + 600000
+              )
+            )
+          );
+          setFetchedData(data);
+          setStartTime(new Date(data.body[0].time_started).getTime());
+          setEndTime(
+            new Date(data.body[0].time_started).setTime(
+              new Date(data.body[0].time_started).getTime() + 600000
+            )
+          );
+        })
+        .catch((err) => console.log(err));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (fetchedData.length === 0) {
-      console.log("API is not fetched yet......");
+      
     } else if (fetchedData.message === "rid is already used") {
-      // debugger
-      localSurveyData !== null && setSurveyData(JSON.parse(localSurveyData));
+      const lsd = localStorage.getItem(`survey_data${RID}`);
+      lsd !== null && setSurveyData(JSON.parse(localSurveyData));
     } else {
       let fetched_data = [
         {
@@ -194,7 +225,8 @@ const Survey = () => {
         },
         {
           id: fetchedData.body[0].market4[0].id,
-          question: "Will upcoming James Bond film “No Time To Die” be “Certified Fresh” by Rotten Tomatoes?",
+          question:
+            "Will upcoming James Bond film “No Time To Die” be “Certified Fresh” by Rotten Tomatoes?",
           subtotal: 0,
           options: [
             {
@@ -219,16 +251,29 @@ const Survey = () => {
         },
       ];
 
-      setDefaultData(fetched_data);
-      setSurveyData(fetched_data);
-      localStorage.setItem("default_data", JSON.stringify(fetched_data));
-      localStorage.setItem("survey_data", JSON.stringify(fetched_data));
-    }
-  }, [fetchedData]);
+      const shuffle = () => {
+        return fetched_data.sort(() => Math.random() - 0.5);
+      };
 
-  localStorage.setItem("survey_data", JSON.stringify(surveyData));
-  localStorage.setItem("userId", userId);
-  localStorage.setItem("cart_data", JSON.stringify(cartData));
+      const shuffled_fetched_data = shuffle();
+
+      setDefaultData(shuffled_fetched_data);
+      setSurveyData(shuffled_fetched_data);
+
+      if (shuffled_fetched_data.length > 0) {
+        localStorage.setItem(
+          `default_data${RID}`,
+          JSON.stringify(shuffled_fetched_data)
+        );
+      }
+      setLocalSurveyData(JSON.stringify(shuffled_fetched_data));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchedData, setFetchedData]);
+
+  localStorage.setItem(`survey_data${RID}`, JSON.stringify(surveyData));
+  localStorage.setItem(`userId${RID}`, JSON.stringify(RID));
+  localStorage.setItem(`cart_data${RID}`, JSON.stringify(cartData));
 
   let totalPurchase;
   let totalShares;
@@ -243,16 +288,17 @@ const Survey = () => {
   };
 
   const submitData = () => {
-    const l_cart_data = localStorage.getItem("cart_data");
-    console.log(l_cart_data !== null && JSON.parse(l_cart_data));
+    const l_cart_data = localStorage.getItem(`cart_data${RID}`);
 
     if (l_cart_data !== null && JSON.parse(l_cart_data).length !== 0) {
       console.log("data in cart");
       const parse_l_cart_data = JSON.parse(l_cart_data);
       let convertedData = {};
-
+      setLocalThankYouPage(true);
       const marketIDs = parse_l_cart_data.map((market: any) => market.id);
-      const marketOptions = parse_l_cart_data.map((market: any) => market.options);
+      const marketOptions = parse_l_cart_data.map(
+        (market: any) => market.options
+      );
 
       for (let d in parse_l_cart_data) {
         const optId = marketOptions[d].map((m: any) => m.id);
@@ -277,25 +323,26 @@ const Survey = () => {
         };
       }
       axios
-        .post("https://market-flask-app.herokuapp.com/api/end_survey", JSON.stringify(convertedData), {
-          headers: { "Content-Type": "application/json" },
-        })
+        .post(
+          process.env.REACT_APP_END_SURVEY_API!,
+          JSON.stringify(convertedData),
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        )
         .then((res) => {
           setShowThankyouPage(true);
-          localStorage.setItem("thank_you_page", "true");
+          setLocalThankYouPage(true);
         })
         .catch((err) => console.log(err));
 
-      axios.get("https://market-flask-app.herokuapp.com/api/prices");
+      axios.get(process.env.REACT_APP_PRICE_API!);
     } else {
-      console.log("after 10 min");
-      const localData = localStorage.getItem("timer");
+      const localData = localStorage.getItem(`timer${RID}`);
       if (localData !== null && JSON.parse(localData) >= 599) {
-        console.log("inside data");
-
         axios
           .post(
-            "https://market-flask-app.herokuapp.com/api/end_survey",
+            process.env.REACT_APP_END_SURVEY_API!,
             JSON.stringify({
               market1: { id: 1, options: [{ id: 11, bet: 0 }] },
             }),
@@ -305,42 +352,46 @@ const Survey = () => {
           )
           .then((res) => {
             setShowThankyouPage(true);
-            localStorage.setItem("thank_you_page", "true");
+            setLocalThankYouPage(true);
           })
           .catch((err) => console.log(err));
-        axios.get("https://market-flask-app.herokuapp.com/api/prices");
+        axios.get(process.env.REACT_APP_PRICE_API!);
       } else {
-        console.log("there is no Shares in Cart");
       }
     }
-    localStorage.setItem("thank_you_page", "true");
+    setLocalThankYouPage(true);
   };
 
   const showTimerPopUp = () => {
     if (surveyData) {
       const timeLimit = 480;
-      const localTimer = localStorage.getItem("timer");
-      const localTimerCount = localStorage.getItem("timer_count");
-      let i = localTimer !== null ? JSON.parse(localTimer) : 0;
-      let count = localTimerCount !== null ? JSON.parse(localTimerCount) : 0;
+
+      let i;
+      let count = localTimerCount;
       const timer = setInterval(() => {
-        i++;
-        if (i === timeLimit && count == 0) {
+        const localEndTime = localStorage.getItem(`endtime${RID}`);
+        const getLocalEndTime =
+          localEndTime !== null && JSON.parse(localEndTime);
+        i = parseInt(
+          (600 - (getLocalEndTime - new Date().getTime()) / 1000).toString()
+        );
+        
+        if (i === timeLimit && count === 0) {
           count++;
-          localStorage.setItem("timer_count", JSON.stringify(count));
+          setLocalTimerCount(count)
           setShowTimerAlert(true);
           setShowWarning(true);
           playNotification();
         }
-        if (i >= 600) {
+        if (i === 600) {
           submitData();
           clearInterval(timer);
-          localStorage.setItem("thank_you_page", "true");
+          setLocalThankYouPage(true);
           setShowThankyouPage(true);
+          return;
         }
         setTimer(i);
-        localStorage.setItem("timer", JSON.stringify(i));
-        localStorage.setItem("thank_you_page", "false");
+        setLocalTimer(JSON.stringify(i));
       }, 1000);
     }
   };
@@ -361,86 +412,96 @@ const Survey = () => {
     const subtotalArr = onlyOpt.map((opt) => opt.total);
     const totalSharesArr = onlyOpt.map((opt) => opt.quantity);
 
-    totalPurchase = parseFloat(subtotalArr.reduce((p, c) => p + c, 0).toFixed(2));
+    totalPurchase = parseFloat(
+      subtotalArr.reduce((p, c) => p + c, 0).toFixed(2)
+    );
     totalShares = totalSharesArr.reduce((p, c) => p + c, 0);
   }
 
   return (
     <>
-      {/* {surveyData.length !== 0 ? ( */}
-      <>
-        {!showThankyouPage && (
-          <div className="app_background_overlay" style={{ display: toggleSidebar ? "block" : "none", zIndex: 9 }} />
+      {!localThankYouPage && (
+        <div
+          className="app_background_overlay"
+          onClick={() => setToggleSidebar(false)}
+          style={{ display: toggleSidebar ? "block" : "none", zIndex: 9 }}
+        />
+      )}
+      <div className="survey">
+        {surveyData.length !== 0 ? (
+          <>
+            <AlertModal
+              showWarning={showWarning}
+              setShowWarning={setShowWarning}
+              type={showTimerAlert ? "time" : "balance"}
+              timer={timer}
+              toggleSidebar={toggleSidebar}
+              setToggleSidebar={setToggleSidebar}
+            />
+            <InfoModal
+              showInfoPopup={showInfoPopup}
+              setShowInfoPopup={setShowInfoPopup}
+              surveyData={surveyData}
+              infoID={infoID}
+            />
+            {!showThankyouPage ? (
+              <>
+                <SurveySidebar
+                  totalShares={totalShares}
+                  totalPurchase={totalPurchase}
+                  surveyData={surveyData}
+                  setSurveyData={setSurveyData}
+                  cartData={cartData}
+                  setCartData={setCartData}
+                  toggleSidebar={toggleSidebar}
+                  setToggleSidebar={setToggleSidebar}
+                  setShowThankyouPage={setShowThankyouPage}
+                  submitData={submitData}
+                  timer={timer}
+                />
+                <SurveyHeader
+                  totalPurchase={totalPurchase}
+                  toggleSidebar={toggleSidebar}
+                  setToggleSidebar={setToggleSidebar}
+                  timer={timer}
+                />
+                <p
+                  className="text-center font-italic my-2"
+                  style={{ color: "#727272" }}
+                >
+                  <em>Tap an option to purchase a share</em>
+                </p>
+                <SurveyData
+                  showBalancePopup={showBalancePopup}
+                  totalPurchase={totalPurchase}
+                  surveyData={surveyData}
+                  setSurveyData={setSurveyData}
+                  cartData={cartData}
+                  setCartData={setCartData}
+                  showInfoPopup={showInfoPopup}
+                  setShowInfoPopup={setShowInfoPopup}
+                  setInfoID={setInfoID}
+                  infoID={infoID}
+                />
+              </>
+            ) : (
+              <div
+                className="d-flex justify-content-center align-items-center w-100"
+                style={{ height: "100vh" }}
+              >
+                <Successful />
+              </div>
+            )}
+          </>
+        ) : (
+          <div
+            className="d-flex justify-content-center align-items-center w-100"
+            style={{ height: "100vh" }}
+          >
+            <Spinner animation="border" />
+          </div>
         )}
-        <div className="survey">
-          {surveyData.length !== 0 ? (
-            <>
-              <AlertModal
-                showWarning={showWarning}
-                setShowWarning={setShowWarning}
-                type={showTimerAlert ? "time" : "balance"}
-                timer={timer}
-                toggleSidebar={toggleSidebar}
-                setToggleSidebar={setToggleSidebar}
-              />
-              <InfoModal
-                showInfoPopup={showInfoPopup}
-                setShowInfoPopup={setShowInfoPopup}
-                surveyData={surveyData}
-                infoID={infoID}
-              />
-              {!showThankyouPage ? (
-                <>
-                  <SurveySidebar
-                    totalShares={totalShares}
-                    totalPurchase={totalPurchase}
-                    surveyData={surveyData}
-                    setSurveyData={setSurveyData}
-                    cartData={cartData}
-                    setCartData={setCartData}
-                    toggleSidebar={toggleSidebar}
-                    setToggleSidebar={setToggleSidebar}
-                    setShowThankyouPage={setShowThankyouPage}
-                    submitData={submitData}
-                  />
-                  <SurveyHeader
-                    totalPurchase={totalPurchase}
-                    toggleSidebar={toggleSidebar}
-                    setToggleSidebar={setToggleSidebar}
-                    timer={timer}
-                  />
-                  <p className="text-center font-italic my-2" style={{ color: "#727272" }}>
-                    <em>Tap an option to purchase a share</em>
-                  </p>
-                  <SurveyData
-                    showBalancePopup={showBalancePopup}
-                    totalPurchase={totalPurchase}
-                    surveyData={surveyData}
-                    setSurveyData={setSurveyData}
-                    cartData={cartData}
-                    setCartData={setCartData}
-                    showInfoPopup={showInfoPopup}
-                    setShowInfoPopup={setShowInfoPopup}
-                    setInfoID={setInfoID}
-                    infoID={infoID}
-                  />
-                </>
-              ) : (
-                  <div  className='d-flex justify-content-center align-items-center w-100' style={{height: '100vh'}}>
-                    <Successful />
-                  </div>
-              )}
-            </>
-          ) : (
-            <div className='d-flex justify-content-center align-items-center w-100' style={{height: '100vh'}}>
-              <Spinner animation="border" />
-            </div>
-          )}
-        </div>
-      </>
-      {/* ) : (
-        <div>Loading...</div>
-      )} */}
+      </div>
     </>
   );
 };

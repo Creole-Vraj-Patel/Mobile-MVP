@@ -1,22 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { nanoid } from "nanoid";
-import { Redirect } from "react-router-dom";
 
 const Generate = () => {
-  const userID = localStorage.getItem("userId");
-  const url = userID ? `/?RID=${userID}` : `/?RID=${nanoid()}`;
 
-  if (userID === null) {
-    localStorage.removeItem("thank_you_page");
-  }
+  useEffect(() => {
+    document.getElementById("generateRID")?.click();
+  }, []);
+
+  const newRID = nanoid();
 
   return (
     <div>
-      <Redirect
-        to={{
-          pathname: url,
-        }}
-      />
+      <a
+        style={{ textDecoration: "none", color: 'white' }}
+        href={`/?RID=${newRID}`}
+        id="generateRID"
+      >
+        dxsaxsax
+      </a>
     </div>
   );
 };

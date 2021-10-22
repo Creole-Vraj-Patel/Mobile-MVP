@@ -38,7 +38,7 @@ const SurveyHeader: React.FC<Props> = ({
         </div>
       </div>
       <ProgressBar
-        id="progress_bar"
+        className="progress_bar"
         variant="info"
         now={(timer * 100) / 600}
         style={{ borderRadius: "0px", height: "5px" }}

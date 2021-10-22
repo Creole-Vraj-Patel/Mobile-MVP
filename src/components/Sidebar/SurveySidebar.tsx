@@ -1,6 +1,6 @@
-import axios from "axios";
 import React from "react";
-import { MarketOptiontype, MarketType } from "../../types";
+import { useLocation } from "react-router";
+import { MarketType } from "../../types";
 import SidebarData from "./SidebarData";
 import SidebarHeader from "./SidebarHeader";
 import SidebarTotal from "./SidebarTotal";
@@ -16,6 +16,7 @@ type Props = {
   setCartData: React.Dispatch<React.SetStateAction<[] | MarketType[]>>;
   setShowThankyouPage: React.Dispatch<React.SetStateAction<boolean>>;
   submitData: () => void;
+  timer: number;
 };
 
 const SurveySidebar: React.FC<Props> = ({
@@ -28,15 +29,19 @@ const SurveySidebar: React.FC<Props> = ({
   setCartData,
   totalPurchase,
   submitData,
+  timer,
 }) => {
+  const params = new URLSearchParams(useLocation().search);
+  const RID = params.get("RID");
+
   const removeFromCart = () => {
-    let localDefaultData = localStorage.getItem("default_data");
-    if (localDefaultData) {
+    const local_default = localStorage.getItem(`default_data${RID}`)
+    if (local_default !== null) {
       setCartData([]);
       setToggleSidebar(!toggleSidebar);
-      setSurveyData([...JSON.parse(localDefaultData)]);
+      setSurveyData(JSON.parse(local_default));
     }
-  };
+  };  
 
   return (
     <div
@@ -47,6 +52,7 @@ const SurveySidebar: React.FC<Props> = ({
         totalShares={totalShares}
         toggleSidebar={toggleSidebar}
         setToggleSidebar={setToggleSidebar}
+        timer={timer}
       />
       <div className="survey_sidebar_remove">
         <p style={{ fontWeight: 400, fontSize: "12px" }}>
@@ -76,7 +82,11 @@ const SurveySidebar: React.FC<Props> = ({
           setCartData={setCartData}
         />
       ))}
-      <SidebarTotal totalPurchase={totalPurchase} submitData={submitData} cartData={cartData}/>
+      <SidebarTotal
+        totalPurchase={totalPurchase}
+        submitData={submitData}
+        cartData={cartData}
+      />
     </div>
   );
 };

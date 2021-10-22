@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { Button, Modal } from "react-bootstrap";
+import React, { useEffect } from "react";
+import { Modal } from "react-bootstrap";
 import Warning from "../../assets/Warning.svg";
 import Cross from "../../assets/Cross Gray.svg";
 import AlertSound from "../../assets/sounds/Alert.mp3";
 import { Howl, Howler } from "howler";
-import ReactAudioPlayer from "react-audio-player";
+import {
+  BALANCE_LINE1,
+  BALANCE_LINE2,
+  TIME_LINE1,
+  TIME_LINE2,
+} from "../../constants";
 
 type Props = {
   timer: number;
@@ -15,12 +20,14 @@ type Props = {
   setToggleSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const AlertModal: React.FC<Props> = ({ timer, showWarning, setShowWarning, type, toggleSidebar, setToggleSidebar }) => {
-  useEffect(() => {
-    document.getElementById("alertModal")?.focus();
-    document.getElementById("alertModal")?.click();
-  }, []);
-
+const AlertModal: React.FC<Props> = ({
+  timer,
+  showWarning,
+  setShowWarning,
+  type,
+  toggleSidebar,
+  setToggleSidebar,
+}) => {
   useEffect(() => {
     if (showWarning) {
       playNotification();
@@ -62,7 +69,7 @@ const AlertModal: React.FC<Props> = ({ timer, showWarning, setShowWarning, type,
         tabIndex={0}
         onBlur={() => setShowWarning(!showWarning)}
       >
-        <div className="alertModal_main p-4" >
+        <div className="alertModal_main p-4">
           <img
             src={Cross}
             alt="Cross Button"
@@ -84,15 +91,11 @@ const AlertModal: React.FC<Props> = ({ timer, showWarning, setShowWarning, type,
             style={{ marginBottom: "22px" }}
           />
           <p className="text-center">
-            {type === "balance"
-              ? "You do not have enough balance to select more shares."
-              : "You have 2 minutes remaining to purchase shares."}
+            {type === "balance" ? BALANCE_LINE1 : TIME_LINE1}
           </p>
           <br />
           <p className="text-center">
-            {type === "balance"
-              ? "Please remove some shares from cart to continue."
-              : "Please complete your purchases and checkout from the cart."}
+            {type === "balance" ? BALANCE_LINE2 : TIME_LINE2}
           </p>
           <br />
           <button

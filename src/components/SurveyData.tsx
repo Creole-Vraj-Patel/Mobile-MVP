@@ -110,20 +110,20 @@ const SurveyData: React.FC<Props> = ({
                     marketOption.quantity === 0 ? "#fafafa" : "#F2FCFF",
                 }}
               >
-                <div className="survey_data_optionUp">
-                  <div className="survey_data_option_amount" style={{fontFamily: 'Open Sans'}}>
+                <div className="survey_data_option_up">
+                  <div className="survey_data_option_amount">
                     ${marketOption.price.toFixed(2)}<span style={{fontFamily: "Segoe UI Regular"}}>/share</span>{" "}
                   </div>
                   <div className="survey_data_option_details">
                     <span>
-                      Purchased: <span style={{fontFamily: 'Open Sans'}}>{marketOption.quantity}</span>
+                      Purchased: <span>{marketOption.quantity}</span>
                     </span>
                     <span>
-                      Subtotal: <span style={{fontFamily: 'Open Sans'}}>${marketOption.total.toFixed(2)}</span>
+                      Subtotal: <span>${marketOption.total.toFixed(2)}</span>
                     </span>
                   </div>
                 </div>
-                <div className="survey_data_optionDown">
+                <div className="survey_data_option_down">
                   <div className="survey_data_option_text">
                     {marketOption.name}
                   </div>

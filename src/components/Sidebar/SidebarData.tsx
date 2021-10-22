@@ -87,10 +87,9 @@ const SidebarData: React.FC<Props> = ({
 
     mainCartData.splice(cartMarketIndex, 1, newMainCartMarketData);
 
-    console.log(mainCartData);
-
-    const filteredMainCart = mainCartData.filter(mrkt => mrkt.options.length !== 0)
-    
+    const filteredMainCart = mainCartData.filter(
+      (mrkt) => mrkt.options.length !== 0
+    );
 
     setCartData([...filteredMainCart]);
   };
@@ -104,14 +103,15 @@ const SidebarData: React.FC<Props> = ({
             {market.options.map((option, optionIndex) => (
               <div className="sidebarData_option" key={option.id}>
                 <div className="sidebarData_optionUp">
-
-                  <div className="sidebarData_optionUp_left" style={{fontFamily: 'Open Sans'}}>
+                  <div className="sidebarData_optionUp_left">
                     ${option.price.toFixed(2)}
-                    <span style={{fontFamily: "Segoe UI Regular"}}>/share</span>
+                    <span style={{ fontFamily: "Segoe UI Regular" }}>
+                      /share
+                    </span>
                   </div>
                   <div className="sidebarData_optionUp_right">
-                    Purchased: <span style={{fontFamily: 'Open Sans'}}>{option.quantity}</span> Subtotal:{" "}
-                    <span style={{fontFamily: 'Open Sans'}}>${option.total.toFixed(2)}</span>{" "}
+                    Purchased: <span>{option.quantity}</span> Subtotal:{" "}
+                    <span>${option.total.toFixed(2)}</span>{" "}
                   </div>
                 </div>
                 <div className="sidebarData_optionDown">
@@ -136,7 +136,7 @@ const SidebarData: React.FC<Props> = ({
           >
             sub total :{" "}
           </p>
-          <p style={{ color: "#293072", fontSize: "14px", fontWeight: "bold", fontFamily: 'Open Sans' }}>
+          <p style={{ color: "#293072", fontSize: "14px", fontWeight: "bold" }}>
             ${market.subtotal?.toFixed(2)}
           </p>
         </div>
