@@ -14,6 +14,8 @@ const SidebarHeader: React.FC<Props> = ({
   totalShares,
   timer,
 }) => {
+  console.log((600 - timer) % 60 > 9);
+
   return (
     <div className="survey_sidebar_header">
       <div className="survey_sidebar_headerUp">
@@ -21,26 +23,37 @@ const SidebarHeader: React.FC<Props> = ({
           className="text-uppercase"
           style={{ fontSize: "12px", fontWeight: 400 }}
         >
-          my shares  {' '}
+          my shares{" "}
           <div>
-            Time Remaining: 
-            <b>{' '}{' '}{` ${parseInt(((600 - timer) / 60).toString())}:${
-              (600 - timer) % 60
-            }`}</b>
+            Time Remaining:
+            <b>
+              {" "}
+              {((600 - timer) / 60).toString().split(".")[0].split("").length >
+              1
+                ? parseInt(((600 - timer) / 60).toString())
+                : `0${parseInt(((600 - timer) / 60).toString())}`}
+              {":"}
+              {(600 - timer) % 60 > 9
+                ? (600 - timer) % 60
+                : `0${(600 - timer) % 60}`}
+              {/* {`  ${ ((600 - timer) / 60).toString().split(".")[0].split("").length > 1 ? parseInt(((600 - timer) / 60).toString()) : }:${
+                (600 - timer) % 60
+              }`} */}
+            </b>
           </div>
         </div>
         <img
           src={CrossIcon}
           alt="cancle icon"
-          height="13px"
-          width="13px"
+          height="20px"
+          width="20px"
           style={{ cursor: "pointer" }}
           onClick={() => setToggleSidebar(!toggleSidebar)}
         />
       </div>
       <div
         className="survey_sidebar_headerDown"
-        style={{ fontSize: "16px", fontWeight: 600, marginTop: '0px' }}
+        style={{ fontSize: "16px", fontWeight: 600, marginTop: "0px" }}
       >
         Total shares selected: {totalShares}
       </div>
