@@ -33,9 +33,7 @@ const Survey = () => {
     `timer_count${RID}`
   );
   const [fetchedData, setFetchedData] = useState<any>([]);
-  const [, setDefaultData] = useState<MarketType[] | []>(
-    localDefaultData
-  );
+  const [, setDefaultData] = useState<MarketType[] | []>(localDefaultData);
   const [surveyData, setSurveyData] = useState<MarketType[] | []>(
     localSurveyData
   );
@@ -83,12 +81,11 @@ const Survey = () => {
         })
         .catch((err) => console.log(err));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (fetchedData.length === 0) {
-      
     } else if (fetchedData.message === "rid is already used") {
       const lsd = localStorage.getItem(`survey_data${RID}`);
       lsd !== null && setSurveyData(JSON.parse(localSurveyData));
@@ -338,26 +335,26 @@ const Survey = () => {
 
       axios.get(process.env.REACT_APP_PRICE_API!);
     } else {
-      const localData = localStorage.getItem(`timer${RID}`);
-      if (localData !== null && JSON.parse(localData) >= 599) {
-        axios
-          .post(
-            process.env.REACT_APP_END_SURVEY_API!,
-            JSON.stringify({
-              market1: { id: 1, options: [{ id: 11, bet: 0 }] },
-            }),
-            {
-              headers: { "Content-Type": "application/json" },
-            }
-          )
-          .then((res) => {
-            setShowThankyouPage(true);
-            setLocalThankYouPage(true);
-          })
-          .catch((err) => console.log(err));
-        axios.get(process.env.REACT_APP_PRICE_API!);
-      } else {
-      }
+      // const localData = localStorage.getItem(`timer${RID}`);
+      // if (localData !== null && JSON.parse(localData) >= 599) {
+      //   axios
+      //     .post(
+      //       process.env.REACT_APP_END_SURVEY_API!,
+      //       JSON.stringify({
+      //         market1: { id: 1, options: [{ id: 11, bet: 0 }] },
+      //       }),
+      //       {
+      //         headers: { "Content-Type": "application/json" },
+      //       }
+      //     )
+      //     .then((res) => {
+      //       setShowThankyouPage(true);
+      //       setLocalThankYouPage(true);
+      //     })
+      //     .catch((err) => console.log(err));
+      //   axios.get(process.env.REACT_APP_PRICE_API!);
+      // } else {
+      // }
     }
     setLocalThankYouPage(true);
   };
@@ -375,10 +372,10 @@ const Survey = () => {
         i = parseInt(
           (600 - (getLocalEndTime - new Date().getTime()) / 1000).toString()
         );
-        
+
         if (i === timeLimit && count === 0) {
           count++;
-          setLocalTimerCount(count)
+          setLocalTimerCount(count);
           setShowTimerAlert(true);
           setShowWarning(true);
           playNotification();
