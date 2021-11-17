@@ -14,7 +14,6 @@ const SidebarHeader: React.FC<Props> = ({
   totalShares,
   timer,
 }) => {
-  console.log((600 - timer) % 60 > 9);
 
   return (
     <div className="survey_sidebar_header">

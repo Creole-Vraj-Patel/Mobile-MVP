@@ -284,11 +284,29 @@ const Survey = () => {
     sound.play();
   };
 
+  const submitPriceApi = () => {
+    axios
+      .get(process.env.REACT_APP_PRICE_API!)
+      .then((res: any) => {
+        if (res?.data?.message === "No user start survey.") {
+          submitPriceApi();
+        } else if (
+          res?.data?.message === "all Market prices are updated successfully."
+        ) {
+          setShowThankyouPage(true);
+          setLocalThankYouPage(true);
+        } else {
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   const submitData = () => {
     const l_cart_data = localStorage.getItem(`cart_data${RID}`);
 
     if (l_cart_data !== null && JSON.parse(l_cart_data).length !== 0) {
-      console.log("data in cart");
       const parse_l_cart_data = JSON.parse(l_cart_data);
       let convertedData = {};
       setLocalThankYouPage(true);
@@ -327,13 +345,20 @@ const Survey = () => {
             headers: { "Content-Type": "application/json" },
           }
         )
-        .then((res) => {
-          setShowThankyouPage(true);
-          setLocalThankYouPage(true);
+        .then((res: any) => {
+          if (res?.data?.message === "RID already exists use different one.") {
+            submitData();
+          } else if (res?.data?.message === "success") {
+            submitPriceApi();
+          } else {
+          }
+
+          // setShowThankyouPage(true);
+          // setLocalThankYouPage(true);
         })
         .catch((err) => console.log(err));
 
-      axios.get(process.env.REACT_APP_PRICE_API!);
+      // axios.get(process.env.REACT_APP_PRICE_API!);
     } else {
       // const localData = localStorage.getItem(`timer${RID}`);
       // if (localData !== null && JSON.parse(localData) >= 599) {
