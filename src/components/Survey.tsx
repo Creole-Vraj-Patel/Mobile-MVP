@@ -373,8 +373,6 @@ const Survey = () => {
         i = parseInt(
           (600 - (getLocalEndTime - new Date().getTime()) / 1000).toString()
         );
-        console.log(i);
-
         if (
           i === timeLimit &&
           count === 0 &&
