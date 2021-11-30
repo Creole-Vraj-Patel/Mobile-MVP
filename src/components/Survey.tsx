@@ -352,34 +352,9 @@ const Survey = () => {
             submitPriceApi();
           } else {
           }
-
-          // setShowThankyouPage(true);
-          // setLocalThankYouPage(true);
         })
         .catch((err) => console.log(err));
-
-      // axios.get(process.env.REACT_APP_PRICE_API!);
     } else {
-      // const localData = localStorage.getItem(`timer${RID}`);
-      // if (localData !== null && JSON.parse(localData) >= 599) {
-      //   axios
-      //     .post(
-      //       process.env.REACT_APP_END_SURVEY_API!,
-      //       JSON.stringify({
-      //         market1: { id: 1, options: [{ id: 11, bet: 0 }] },
-      //       }),
-      //       {
-      //         headers: { "Content-Type": "application/json" },
-      //       }
-      //     )
-      //     .then((res) => {
-      //       setShowThankyouPage(true);
-      //       setLocalThankYouPage(true);
-      //     })
-      //     .catch((err) => console.log(err));
-      //   axios.get(process.env.REACT_APP_PRICE_API!);
-      // } else {
-      // }
     }
     setLocalThankYouPage(true);
   };
@@ -394,24 +369,31 @@ const Survey = () => {
         const localEndTime = localStorage.getItem(`endtime${RID}`);
         const getLocalEndTime =
           localEndTime !== null && JSON.parse(localEndTime);
+        const localThankYou = localStorage.getItem(`thank_you_page${RID}`);
         i = parseInt(
           (600 - (getLocalEndTime - new Date().getTime()) / 1000).toString()
         );
+        console.log(i);
 
-        if (i === timeLimit && count === 0) {
+        if (
+          i === timeLimit &&
+          count === 0 &&
+          localThankYou !== null &&
+          !JSON.parse(localThankYou)
+        ) {
           count++;
           setLocalTimerCount(count);
           setShowTimerAlert(true);
           setShowWarning(true);
           playNotification();
         }
-        if (i === 600) {
-          submitData();
-          clearInterval(timer);
-          setLocalThankYouPage(true);
-          setShowThankyouPage(true);
-          return;
-        }
+        // if (i === 600) {
+        //   submitData();
+        //   clearInterval(timer);
+        //   setLocalThankYouPage(true);
+        //   setShowThankyouPage(true);
+        //   return;
+        // }
         setTimer(i);
         setLocalTimer(JSON.stringify(i));
       }, 1000);

@@ -14,7 +14,6 @@ const SidebarHeader: React.FC<Props> = ({
   totalShares,
   timer,
 }) => {
-
   return (
     <div className="survey_sidebar_header">
       <div className="survey_sidebar_headerUp">
