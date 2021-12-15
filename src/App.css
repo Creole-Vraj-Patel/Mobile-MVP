@@ -1,10 +1,10 @@
-:root{
-  --page_background: #f3f5f7; 
-  --light_blue: #69d3ed; 
-  --blue: #293072; 
-  --grey: #fafafa; 
+:root {
+  --page_background: #f3f5f7;
+  --light_blue: #69d3ed;
+  --blue: #293072;
+  --grey: #fafafa;
   --light_text: #727272;
-  --dark_text: #3a3a3a; 
+  --dark_text: #3a3a3a;
   --card_background: #f2fcff;
 }
 
@@ -376,6 +376,9 @@ p {
   border: none;
   color: white;
   transition: 150ms;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .sidebar_total_submit:hover {
   background-color: var(--light_blue);
@@ -394,7 +397,7 @@ p {
   width: 100%;
   transition: 200ms;
 }
-#alertModal{
+#alertModal {
   outline: none;
   border: none;
 }
@@ -427,11 +430,11 @@ p {
   font-size: 16px;
   font-weight: 600;
 }
-.infoModal .modal-dialog{
+.infoModal .modal-dialog {
   outline: none;
   border: none;
 }
-.alertModal{
+.alertModal {
   outline: none;
   border: none;
 }
@@ -445,7 +448,6 @@ p {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-
 }
 .infoModal_main > h3 {
   color: var(--blue);

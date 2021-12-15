@@ -49,6 +49,7 @@ const Survey = () => {
   const [infoID, setInfoID] = useState<number>(0);
   const [, setStartTime] = useState<any>();
   const [, setEndTime] = useState<any>();
+  const [buttonLoading, setButtonLoading] = useState<boolean>(false);
 
   sessionStorage.setItem(`userId${RID}`, RID!);
 
@@ -285,24 +286,6 @@ const Survey = () => {
     sound.play();
   };
 
-  const submitPriceApi = () => {
-    axios
-      .get(process.env.REACT_APP_PRICE_API!)
-      .then((res: any) => {
-        if (
-          res?.data?.message === "all Market prices are updated successfully."
-        ) {
-          setShowThankyouPage(true);
-          setLocalThankYouPage(true);
-        } else {
-          toast.error(res?.data?.message);
-        }
-      })
-      .catch((err) => {
-        submitPriceApi();
-      });
-  };
-
   const submitData = () => {
     setToggleSidebar(true);
     const l_cart_data = sessionStorage.getItem(`cart_data${RID}`);
@@ -360,13 +343,17 @@ const Survey = () => {
         )
         .then((res: any) => {
           if (res?.data?.message === "success") {
-            submitPriceApi();
+            setShowThankyouPage(true);
+            setLocalThankYouPage(true);
           } else {
             toast.error(res?.data?.message);
           }
+          setButtonLoading(false);
         })
-        .catch((err) => toast.error(err?.message));
-    } else {
+        .catch((err) => {
+          toast.error(err?.message);
+          setButtonLoading(false);
+        });
     }
   };
 
@@ -464,6 +451,8 @@ const Survey = () => {
                   setShowThankyouPage={setShowThankyouPage}
                   submitData={submitData}
                   timer={timer}
+                  setButtonLoading={setButtonLoading}
+                  buttonLoading={buttonLoading}
                 />
                 <SurveyHeader
                   totalPurchase={totalPurchase}

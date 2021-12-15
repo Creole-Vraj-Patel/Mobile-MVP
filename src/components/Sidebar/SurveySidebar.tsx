@@ -17,6 +17,8 @@ type Props = {
   setShowThankyouPage: React.Dispatch<React.SetStateAction<boolean>>;
   submitData: () => void;
   timer: number;
+  buttonLoading: boolean;
+  setButtonLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const SurveySidebar: React.FC<Props> = ({
@@ -30,6 +32,8 @@ const SurveySidebar: React.FC<Props> = ({
   totalPurchase,
   submitData,
   timer,
+  buttonLoading,
+  setButtonLoading,
 }) => {
   const params = new URLSearchParams(useLocation().search);
   const RID = params.get("RID");
@@ -86,6 +90,8 @@ const SurveySidebar: React.FC<Props> = ({
         totalPurchase={totalPurchase}
         submitData={submitData}
         cartData={cartData}
+        setButtonLoading={setButtonLoading}
+        buttonLoading={buttonLoading}
       />
     </div>
   );

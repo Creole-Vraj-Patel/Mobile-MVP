@@ -1,17 +1,21 @@
 import React from "react";
-import { Button } from "react-bootstrap";
+import { Button, Spinner } from "react-bootstrap";
 import { MarketType } from "../../types";
 
 type Props = {
   totalPurchase: number | undefined;
   submitData: () => void;
   cartData: MarketType[] | [];
+  buttonLoading: boolean;
+  setButtonLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const SidebarTotal: React.FC<Props> = ({
   submitData,
   totalPurchase,
   cartData,
+  buttonLoading,
+  setButtonLoading,
 }) => {
   return (
     <div className="sidebar_total">
@@ -25,10 +29,20 @@ const SidebarTotal: React.FC<Props> = ({
       </div>
       <Button
         className="sidebar_total_submit"
-        onClick={submitData}
-        disabled={cartData.length === 0 ? true : false}
+        onClick={() => {
+          setButtonLoading(true);
+          submitData();
+        }}
+        disabled={cartData.length === 0 || buttonLoading ? true : false}
       >
-        Submit
+        {buttonLoading && (
+          <Spinner
+            size="sm"
+            animation="border"
+            style={{ marginRight: "10px" }}
+          />
+        )}
+        <span>Submit</span>
       </Button>
     </div>
   );
