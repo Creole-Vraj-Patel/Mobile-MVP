@@ -16,7 +16,7 @@ const SurveyHeader: React.FC<Props> = ({
   setToggleSidebar,
 }) => {
   return (
-    <div className='survey_header'>
+    <div className="survey_header">
       <div className="survey_header_main">
         <div className="survey_header_left">
           <p>

@@ -26,7 +26,7 @@ const SurveyData: React.FC<Props> = ({
   cartData,
   setCartData,
   setInfoID,
-  infoID
+  infoID,
 }) => {
   const addShares = (marketIndex: number, marketOptionIndex: number) => {
     const mainData = surveyData;
@@ -37,7 +37,9 @@ const SurveyData: React.FC<Props> = ({
     const newOption = {
       ...mainDataOption,
       quantity: mainDataOption.quantity + 1,
-      total: parseFloat((mainDataOption.price * (mainDataOption.quantity + 1)).toFixed(2)),
+      total: parseFloat(
+        (mainDataOption.price * (mainDataOption.quantity + 1)).toFixed(2)
+      ),
     };
 
     mainDataOptions.splice(marketOptionIndex, 1, newOption);
@@ -94,8 +96,8 @@ const SurveyData: React.FC<Props> = ({
               src={InfoLogo}
               alt="Info Logo"
               onClick={() => {
-                setShowInfoPopup(!showInfoPopup)
-                setInfoID(JSON.parse(market.id))
+                setShowInfoPopup(!showInfoPopup);
+                setInfoID(JSON.parse(market.id));
               }}
               style={{ cursor: "pointer" }}
             />
@@ -112,7 +114,10 @@ const SurveyData: React.FC<Props> = ({
               >
                 <div className="survey_data_option_up">
                   <div className="survey_data_option_amount">
-                    ${marketOption.price.toFixed(2)}<span style={{fontFamily: "Segoe UI Regular"}}>/share</span>{" "}
+                    ${marketOption.price.toFixed(2)}
+                    <span style={{ fontFamily: "Segoe UI Regular" }}>
+                      /share
+                    </span>{" "}
                   </div>
                   <div className="survey_data_option_details">
                     <span>
@@ -138,7 +143,7 @@ const SurveyData: React.FC<Props> = ({
                       if (totalPurchase) {
                         if (10 - totalPurchase < marketOption.price) {
                           showBalancePopup();
-                        }else {
+                        } else {
                           addShares(marketIndex, marketOptionIndex);
                         }
                       } else {

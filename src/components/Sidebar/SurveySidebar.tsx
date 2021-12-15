@@ -35,13 +35,13 @@ const SurveySidebar: React.FC<Props> = ({
   const RID = params.get("RID");
 
   const removeFromCart = () => {
-    const local_default = localStorage.getItem(`default_data${RID}`)
+    const local_default = sessionStorage.getItem(`default_data${RID}`);
     if (local_default !== null) {
       setCartData([]);
       setToggleSidebar(!toggleSidebar);
       setSurveyData(JSON.parse(local_default));
     }
-  };  
+  };
 
   return (
     <div

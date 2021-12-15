@@ -9,6 +9,7 @@ import Successful from "../components/Successful";
 import { useLocation } from "react-router";
 import { MarketOptiontype, MarketType } from "../types";
 import { Howl, Howler } from "howler";
+import toast from "react-hot-toast";
 import axios from "axios";
 import AlertSound from "../assets/sounds/Alert.mp3";
 import useStickyState from "../hooks/useStickyState";
@@ -49,7 +50,7 @@ const Survey = () => {
   const [, setStartTime] = useState<any>();
   const [, setEndTime] = useState<any>();
 
-  localStorage.setItem(`userId${RID}`, RID!);
+  sessionStorage.setItem(`userId${RID}`, RID!);
 
   useEffect(() => {
     showTimerPopUp();
@@ -57,13 +58,17 @@ const Survey = () => {
     if (localSurveyData.length === 0) {
       let formData = new FormData();
       formData.append("rid", RID!);
-      fetch(process.env.REACT_APP_START_SURVEY_API!, {
-        method: "post",
-        body: formData,
-      })
+      fetch(
+        process.env.REACT_APP_START_SURVEY_API!,
+        // process.env.REACT_APP_TEST_START_SURVEY_API!,
+        {
+          method: "post",
+          body: formData,
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
-          localStorage.setItem(
+          sessionStorage.setItem(
             `endtime${RID}`,
             JSON.stringify(
               new Date(data.body[0].time_started).setTime(
@@ -87,7 +92,7 @@ const Survey = () => {
   useEffect(() => {
     if (fetchedData.length === 0) {
     } else if (fetchedData.message === "rid is already used") {
-      const lsd = localStorage.getItem(`survey_data${RID}`);
+      const lsd = sessionStorage.getItem(`survey_data${RID}`);
       lsd !== null && setSurveyData(JSON.parse(localSurveyData));
     } else {
       let fetched_data = [
@@ -258,7 +263,7 @@ const Survey = () => {
       setSurveyData(shuffled_fetched_data);
 
       if (shuffled_fetched_data.length > 0) {
-        localStorage.setItem(
+        sessionStorage.setItem(
           `default_data${RID}`,
           JSON.stringify(shuffled_fetched_data)
         );
@@ -268,9 +273,9 @@ const Survey = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchedData, setFetchedData]);
 
-  localStorage.setItem(`survey_data${RID}`, JSON.stringify(surveyData));
-  localStorage.setItem(`userId${RID}`, JSON.stringify(RID));
-  localStorage.setItem(`cart_data${RID}`, JSON.stringify(cartData));
+  sessionStorage.setItem(`survey_data${RID}`, JSON.stringify(surveyData));
+  sessionStorage.setItem(`userId${RID}`, JSON.stringify(RID));
+  sessionStorage.setItem(`cart_data${RID}`, JSON.stringify(cartData));
 
   let totalPurchase;
   let totalShares;
@@ -286,38 +291,56 @@ const Survey = () => {
 
   const submitPriceApi = () => {
     axios
-      .get(process.env.REACT_APP_PRICE_API!)
+      .get(
+        process.env.REACT_APP_PRICE_API!
+        // process.env.REACT_APP_TEST_PRICE_API!
+      )
       .then((res: any) => {
-        if (res?.data?.message === "No user start survey.") {
-          submitPriceApi();
-        } else if (
+        // if (res?.data?.message === "No user start survey.") {
+        //   submitPriceApi();
+        // } else
+        if (
           res?.data?.message === "all Market prices are updated successfully."
         ) {
           setShowThankyouPage(true);
           setLocalThankYouPage(true);
         } else {
+          toast.error(res?.data?.message);
         }
       })
       .catch((err) => {
-        console.log(err);
+        submitPriceApi();
+        // toast.error(err?.message);
       });
   };
 
   const submitData = () => {
-    const l_cart_data = localStorage.getItem(`cart_data${RID}`);
+    setToggleSidebar(true);
+    const l_cart_data = sessionStorage.getItem(`cart_data${RID}`);
 
     if (l_cart_data !== null && JSON.parse(l_cart_data).length !== 0) {
       const parse_l_cart_data = JSON.parse(l_cart_data);
       let convertedData = {};
-      setLocalThankYouPage(true);
+      // setLocalThankYouPage(true);
       const marketIDs = parse_l_cart_data.map((market: any) => market.id);
-      const marketOptions = parse_l_cart_data.map(
-        (market: any) => market.options
-      );
+      // const marketOptions = parse_l_cart_data.map(
+      //   (market: any) => market.options
+      // );
+      let marketData = [];
 
-      for (let d in parse_l_cart_data) {
-        const optId = marketOptions[d].map((m: any) => m.id);
-        const optBet = marketOptions[d].map((m: any) => m.quantity);
+      for (let d in marketIDs) {
+        let oneMarketData = surveyData?.find((obj) => obj.id === marketIDs[d]);
+        marketData.push(oneMarketData);
+      }
+
+      let marketDataOptions = marketData.map((market: any) => market?.options);
+
+      console.log(marketData);
+
+      for (let d in marketData) {
+        const optId = marketDataOptions[d].map((m: any) => m.id);
+        const optBet = marketDataOptions[d].map((m: any) => m.quantity);
+        const optPrice = marketDataOptions[d].map((m: any) => m.price);
         let opts: any = [];
         for (let i in optId) {
           opts = [
@@ -325,6 +348,7 @@ const Survey = () => {
             {
               id: optId[i],
               bet: optBet[i],
+              price: optPrice[i],
             },
           ];
         }
@@ -337,26 +361,36 @@ const Survey = () => {
           },
         };
       }
+
+      convertedData = {
+        ...convertedData,
+        rid: RID,
+      };
+
+      console.log("converted Data", convertedData);
       axios
         .post(
           process.env.REACT_APP_END_SURVEY_API!,
+          // process.env.REACT_APP_TEST_END_SURVEY_API!,
           JSON.stringify(convertedData),
           {
             headers: { "Content-Type": "application/json" },
           }
         )
         .then((res: any) => {
-          if (res?.data?.message === "RID already exists use different one.") {
-            submitData();
-          } else if (res?.data?.message === "success") {
+          // if (res?.data?.message === "RID already exists use different one.") {
+          //   submitData();
+          // } else
+          if (res?.data?.message === "success") {
             submitPriceApi();
           } else {
+            toast.error(res?.data?.message);
           }
         })
-        .catch((err) => console.log(err));
+        .catch((err) => toast.error(err?.message));
     } else {
     }
-    setLocalThankYouPage(true);
+    // setLocalThankYouPage(true);
   };
 
   const showTimerPopUp = () => {
@@ -366,10 +400,10 @@ const Survey = () => {
       let i;
       let count = localTimerCount;
       const timer = setInterval(() => {
-        const localEndTime = localStorage.getItem(`endtime${RID}`);
+        const localEndTime = sessionStorage.getItem(`endtime${RID}`);
         const getLocalEndTime =
           localEndTime !== null && JSON.parse(localEndTime);
-        const localThankYou = localStorage.getItem(`thank_you_page${RID}`);
+        const localThankYou = sessionStorage.getItem(`thank_you_page${RID}`);
         i = parseInt(
           (600 - (getLocalEndTime - new Date().getTime()) / 1000).toString()
         );
