@@ -58,14 +58,10 @@ const Survey = () => {
     if (localSurveyData.length === 0) {
       let formData = new FormData();
       formData.append("rid", RID!);
-      fetch(
-        process.env.REACT_APP_START_SURVEY_API!,
-        // process.env.REACT_APP_TEST_START_SURVEY_API!,
-        {
-          method: "post",
-          body: formData,
-        }
-      )
+      fetch(process.env.REACT_APP_START_SURVEY_API!, {
+        method: "post",
+        body: formData,
+      })
         .then((res) => res.json())
         .then((data) => {
           sessionStorage.setItem(
@@ -84,7 +80,7 @@ const Survey = () => {
             )
           );
         })
-        .catch((err) => console.log(err));
+        .catch((err) => toast.error(err?.message));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -291,14 +287,8 @@ const Survey = () => {
 
   const submitPriceApi = () => {
     axios
-      .get(
-        process.env.REACT_APP_PRICE_API!
-        // process.env.REACT_APP_TEST_PRICE_API!
-      )
+      .get(process.env.REACT_APP_PRICE_API!)
       .then((res: any) => {
-        // if (res?.data?.message === "No user start survey.") {
-        //   submitPriceApi();
-        // } else
         if (
           res?.data?.message === "all Market prices are updated successfully."
         ) {
@@ -310,7 +300,6 @@ const Survey = () => {
       })
       .catch((err) => {
         submitPriceApi();
-        // toast.error(err?.message);
       });
   };
 
@@ -321,11 +310,7 @@ const Survey = () => {
     if (l_cart_data !== null && JSON.parse(l_cart_data).length !== 0) {
       const parse_l_cart_data = JSON.parse(l_cart_data);
       let convertedData = {};
-      // setLocalThankYouPage(true);
       const marketIDs = parse_l_cart_data.map((market: any) => market.id);
-      // const marketOptions = parse_l_cart_data.map(
-      //   (market: any) => market.options
-      // );
       let marketData = [];
 
       for (let d in marketIDs) {
@@ -334,8 +319,6 @@ const Survey = () => {
       }
 
       let marketDataOptions = marketData.map((market: any) => market?.options);
-
-      console.log(marketData);
 
       for (let d in marketData) {
         const optId = marketDataOptions[d].map((m: any) => m.id);
@@ -367,20 +350,15 @@ const Survey = () => {
         rid: RID,
       };
 
-      console.log("converted Data", convertedData);
       axios
         .post(
           process.env.REACT_APP_END_SURVEY_API!,
-          // process.env.REACT_APP_TEST_END_SURVEY_API!,
           JSON.stringify(convertedData),
           {
             headers: { "Content-Type": "application/json" },
           }
         )
         .then((res: any) => {
-          // if (res?.data?.message === "RID already exists use different one.") {
-          //   submitData();
-          // } else
           if (res?.data?.message === "success") {
             submitPriceApi();
           } else {
@@ -390,7 +368,6 @@ const Survey = () => {
         .catch((err) => toast.error(err?.message));
     } else {
     }
-    // setLocalThankYouPage(true);
   };
 
   const showTimerPopUp = () => {
@@ -419,13 +396,6 @@ const Survey = () => {
           setShowWarning(true);
           playNotification();
         }
-        // if (i === 600) {
-        //   submitData();
-        //   clearInterval(timer);
-        //   setLocalThankYouPage(true);
-        //   setShowThankyouPage(true);
-        //   return;
-        // }
         setTimer(i);
         setLocalTimer(JSON.stringify(i));
       }, 1000);
